@@ -1,0 +1,95 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @unique @default(uuid())
+  firstName   String        @map("first_name")
+  lastName    String        @map("last_name")
+  email       String        @unique
+  password    String
+  type        TypeUser
+  createdAt   DateTime      @default(now()) @map("created_at")
+  updatedAt   DateTime      @updatedAt @map("updated_at")
+  orders      Order[]
+  userProduct UserProduct[]
+
+
+  @@map("users")
+}
+
+model Product {
+  id           String        @id @unique @default(uuid())
+  name         String
+  price        Decimal
+  status       Boolean
+  attachment   Attachment    @relation(fields: [attachmentId], references: [id])
+  attachmentId String        @map("attachment_id")
+  detail       Detail[]
+  userProduct  UserProduct[]
+
+
+  @@map("products")
+}
+
+model UserProduct {
+  product   Product @relation(fields: [productId], references: [id])
+  productId String  @map("product_id")
+  user      User    @relation(fields: [userId], references: [id])
+  userId    String  @map("user_id")
+
+
+  @@id([productId, userId])
+  @@map("user_products")
+}
+
+model Attachment {
+  id          String    @id @unique @default(uuid())
+  path        String
+  key         String
+  ext         String
+  contentType String    @map(name: "content_type")
+  products    Product[]
+  createdAt   DateTime  @default(now()) @map(name: "created_at")
+
+
+  @@map("attachments")
+}
+
+model Order {
+  id        String   @id @unique @default(uuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  detailId  String   @map("detail_id")
+  detail    Detail   @relation(fields: [detailId], references: [id])
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id])
+
+
+  @@map("orders")
+}
+
+model Detail {
+  id        String   @id @unique @default(uuid())
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  orders    Order[]
+  quantity  Int
+  total     Decimal
+  productId String   @map("producto_id")
+  product   Product  @relation(fields: [productId], references: [id])
+
+
+  @@map("details")
+}
+
+enum TypeUser {
+  MANAGER
+  CLIENT
+}
