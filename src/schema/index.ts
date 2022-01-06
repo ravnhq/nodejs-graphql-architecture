@@ -1,9 +1,11 @@
 import { GraphQLSchema, printSchema } from "graphql"
-import QueryType from "./queries"
+import Query from "./queries"
+import Mutation from "./mutations"
 import logger from "../logger"
 
 const schema = new GraphQLSchema({
-  query: QueryType,
+  query: Query,
+  mutation: Mutation,
 })
 
 logger.info(printSchema(schema))

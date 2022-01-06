@@ -21,7 +21,9 @@ CREATE TABLE "products" (
     "name" TEXT NOT NULL,
     "price" DECIMAL(65,30) NOT NULL,
     "status" BOOLEAN NOT NULL,
-    "attachment_id" TEXT NOT NULL,
+    "attachment_id" TEXT,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "products_pkey" PRIMARY KEY ("id")
 );
@@ -42,6 +44,7 @@ CREATE TABLE "attachments" (
     "ext" TEXT NOT NULL,
     "content_type" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "attachments_pkey" PRIMARY KEY ("id")
 );
@@ -52,6 +55,7 @@ CREATE TABLE "orders" (
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "detail_id" TEXT NOT NULL,
     "user_id" TEXT NOT NULL,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "orders_pkey" PRIMARY KEY ("id")
 );
@@ -59,10 +63,11 @@ CREATE TABLE "orders" (
 -- CreateTable
 CREATE TABLE "details" (
     "id" TEXT NOT NULL,
-    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "quantity" INTEGER NOT NULL,
     "total" DECIMAL(65,30) NOT NULL,
     "producto_id" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "details_pkey" PRIMARY KEY ("id")
 );
@@ -86,7 +91,7 @@ CREATE UNIQUE INDEX "orders_id_key" ON "orders"("id");
 CREATE UNIQUE INDEX "details_id_key" ON "details"("id");
 
 -- AddForeignKey
-ALTER TABLE "products" ADD CONSTRAINT "products_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+ALTER TABLE "products" ADD CONSTRAINT "products_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
 -- AddForeignKey
 ALTER TABLE "user_products" ADD CONSTRAINT "user_products_product_id_fkey" FOREIGN KEY ("product_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

@@ -31,11 +31,12 @@ model Product {
   name         String
   price        Decimal
   status       Boolean
-  attachment   Attachment    @relation(fields: [attachmentId], references: [id])
-  attachmentId String        @map("attachment_id")
+  attachment   Attachment?   @relation(fields: [attachmentId], references: [id])
+  attachmentId String?       @map("attachment_id")
   detail       Detail[]
   userProduct  UserProduct[]
-
+  createdAt    DateTime      @default(now()) @map("created_at")
+  updatedAt    DateTime      @updatedAt @map("updated_at")
 
   @@map("products")
 }
@@ -59,7 +60,7 @@ model Attachment {
   contentType String    @map(name: "content_type")
   products    Product[]
   createdAt   DateTime  @default(now()) @map(name: "created_at")
-
+  updatedAt   DateTime  @updatedAt @map("updated_at")
 
   @@map("attachments")
 }
@@ -71,20 +72,20 @@ model Order {
   detail    Detail   @relation(fields: [detailId], references: [id])
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
-
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("orders")
 }
 
 model Detail {
   id        String   @id @unique @default(uuid())
-  createdAt DateTime @default(now()) @map(name: "created_at")
   orders    Order[]
   quantity  Int
   total     Decimal
   productId String   @map("producto_id")
   product   Product  @relation(fields: [productId], references: [id])
-
+  createdAt DateTime @default(now()) @map(name: "created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("details")
 }
