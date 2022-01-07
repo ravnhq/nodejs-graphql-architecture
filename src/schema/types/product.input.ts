@@ -1,13 +1,7 @@
-import {
-  GraphQLInputObjectType,
-  GraphQLString,
-  GraphQLNonNull,
-  GraphQLBoolean,
-  GraphQLFloat,
-} from "graphql"
+import { GraphQLInputObjectType, GraphQLString, GraphQLNonNull, GraphQLBoolean, GraphQLFloat } from 'graphql'
 
 export default new GraphQLInputObjectType({
-  name: "productInput",
+  name: 'productInput',
   fields: () => ({
     name: { type: new GraphQLNonNull(GraphQLString) },
     price: { type: new GraphQLNonNull(GraphQLFloat) },

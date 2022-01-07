@@ -1,4 +1,4 @@
-import { IsInt, IsNumber, IsPositive } from "class-validator"
+import { IsInt, IsNumber, IsPositive } from 'class-validator'
 
 export class PaginationArgs {
   @IsNumber()

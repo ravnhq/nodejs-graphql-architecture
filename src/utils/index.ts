@@ -1,18 +1,12 @@
-import { PaginationArgs } from "./dtos/request/pagination.args"
-import { PaginationDto } from "./dtos/response/pagination.dto"
-import { IPaginationArgs } from "./interfaces"
+import { PaginationArgs } from './dtos/request/pagination.args'
+import { PaginationDto } from './dtos/response/pagination.dto'
+import { IPaginationArgs } from './interfaces'
 
-export const SkipAndTake = ({
-  perPage,
-  page,
-}: PaginationArgs): IPaginationArgs => {
+export const SkipAndTake = ({ perPage, page }: PaginationArgs): IPaginationArgs => {
   return { perPage, skip: (page - 1) * perPage }
 }
 
-export const getPagination = (
-  { perPage, page }: PaginationArgs,
-  totalItems: number,
-): PaginationDto => {
+export const getPagination = ({ perPage, page }: PaginationArgs, totalItems: number): PaginationDto => {
   if (!totalItems) {
     return {
       currentPage: 0,

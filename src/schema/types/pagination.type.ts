@@ -1,13 +1,8 @@
-import {
-  GraphQLInt,
-  GraphQLList,
-  GraphQLNonNull,
-  GraphQLObjectType,
-} from "graphql"
+import { GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 
 export const PaginationType = new GraphQLObjectType({
-  name: "Pagination",
-  description: "Pagination items",
+  name: 'Pagination',
+  description: 'Pagination items',
   fields: {
     currentPage: { type: new GraphQLNonNull(GraphQLInt) },
     itemsPerPage: { type: new GraphQLNonNull(GraphQLInt) },

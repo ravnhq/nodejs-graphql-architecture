@@ -1,8 +1,8 @@
-import { plainToClass } from "class-transformer"
-import { GraphQLFieldConfig, GraphQLNonNull, GraphQLString } from "graphql"
-import { UserDto } from "../../services/dtos/response/user.dto"
-import { UserService } from "../../services/users.service"
-import { UserType } from "../types/user.type"
+import { plainToClass } from 'class-transformer'
+import { GraphQLFieldConfig, GraphQLNonNull, GraphQLString } from 'graphql'
+import { UserDto } from '../../services/dtos/response/user.dto'
+import { UserService } from '../../services/users.service'
+import { UserType } from '../types/user.type'
 
 const currentUser: GraphQLFieldConfig<any, any> = {
   type: UserType,

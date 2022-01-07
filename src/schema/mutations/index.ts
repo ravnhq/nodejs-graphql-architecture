@@ -1,8 +1,8 @@
-import { GraphQLObjectType, GraphQLNonNull, GraphQLID } from "graphql"
-import { productMutations } from "./products.mutations"
+import { GraphQLObjectType, GraphQLNonNull, GraphQLID } from 'graphql'
+import { productMutations } from './products.mutations'
 
 export default new GraphQLObjectType({
-  name: "Mutation",
+  name: 'Mutation',
   fields: () => ({
     ...productMutations,
   }),

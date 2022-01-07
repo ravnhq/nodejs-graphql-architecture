@@ -3,10 +3,7 @@ module.exports = {
   parserOptions: {
     project: './tsconfig.eslint.json',
   },
-  extends: [
-    '@ravn-dev/eslint-config-ravn/base',
-    '@ravn-dev/eslint-config-ravn/typescript',
-  ],
+  extends: ['@ravn-dev/eslint-config-ravn/base', '@ravn-dev/eslint-config-ravn/typescript'],
   rules: {
     'no-console': 'OFF',
     '@typescript-eslint/no-unsafe-assignment': 'OFF',

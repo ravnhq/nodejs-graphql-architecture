@@ -1,6 +1,6 @@
-import { Decimal } from "@prisma/client/runtime"
-import { Exclude, Expose } from "class-transformer"
-import { BaseDto } from "../base.dto"
+import { Decimal } from '@prisma/client/runtime'
+import { Exclude, Expose } from 'class-transformer'
+import { BaseDto } from '../base.dto'
 
 @Exclude()
 export class ProductDto {
