@@ -1,5 +1,5 @@
 import { Product } from '@prisma/client'
-import { plainToClass, plainToInstance } from 'class-transformer'
+import { plainToClass } from 'class-transformer'
 import { prisma } from '../server'
 import { getPagination, SkipAndTake } from '../utils'
 import { productInput } from './dtos/request/product.input'

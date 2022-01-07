@@ -1,4 +1,4 @@
-import { GraphQLInt, GraphQLList, GraphQLNonNull, GraphQLObjectType } from 'graphql'
+import { GraphQLInt, GraphQLNonNull, GraphQLObjectType } from 'graphql'
 
 export const PaginationType = new GraphQLObjectType({
   name: 'Pagination',

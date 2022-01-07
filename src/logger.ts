@@ -1,4 +1,5 @@
 import pino from 'pino'
+
 const getLoggerForEnvironment = () => {
   return pino({
     transport: {

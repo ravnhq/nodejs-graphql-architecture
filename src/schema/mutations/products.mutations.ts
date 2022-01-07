@@ -7,9 +7,7 @@ const createProduct: GraphQLFieldConfig<any, any> = {
   type: ProductType,
   args: { input: { type: new GraphQLNonNull(productInput) } },
   resolve: async function (_source, { input }) {
-    const product = await ProductService.createProduct(input)
-
-    return product
+    return ProductService.createProduct(input)
   },
 }
 

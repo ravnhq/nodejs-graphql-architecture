@@ -1,4 +1,4 @@
-import { GraphQLObjectType, GraphQLNonNull, GraphQLID } from 'graphql'
+import { GraphQLObjectType } from 'graphql'
 import { productMutations } from './products.mutations'
 
 export default new GraphQLObjectType({

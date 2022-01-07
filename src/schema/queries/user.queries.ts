@@ -9,6 +9,7 @@ const currentUser: GraphQLFieldConfig<any, any> = {
   args: { userId: { type: new GraphQLNonNull(GraphQLString) } },
   resolve: async function (_source, { userId }) {
     const user = await UserService.findUser(userId)
+
     return plainToClass(UserDto, user)
   },
 }

@@ -9,10 +9,7 @@ const listProducts: GraphQLFieldConfig<any, any> = {
     perPage: { type: new GraphQLNonNull(GraphQLInt) },
   },
   resolve: async function (_source, args) {
-    console.log(args)
-
-    const product = await ProductService.listProducts(args)
-    return product
+    return ProductService.listProducts(args)
   },
 }
 

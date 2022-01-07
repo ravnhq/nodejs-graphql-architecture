@@ -20,6 +20,7 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use(cors())
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function errorHandler(err: HttpError, _req: Request, res: Response, _next: NextFunction): void {
   if (ENVIROMENT !== 'development') {
     logger.error(err.message)
