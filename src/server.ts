@@ -2,14 +2,9 @@ import 'reflect-metadata'
 import { graphqlHTTP } from 'express-graphql'
 import express, { NextFunction, Request, Response } from 'express'
 import cors from 'cors'
-import createHttpError, { HttpError } from 'http-errors'
-import { PrismaClient } from '@prisma/client'
+import { HttpError } from 'http-errors'
 import logger from './logger'
 import schema from './schema'
-
-export const prisma = new PrismaClient({
-  rejectOnNotFound: (error) => new createHttpError.NotFound(error.message),
-})
 
 const app = express()
 const PORT = process.env.PORT ?? 3000
