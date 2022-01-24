@@ -8,6 +8,6 @@ const schema = new GraphQLSchema({
   mutation: Mutation,
 })
 
-logger.info(printSchema(schema))
+process.env.NODE_ENV === 'production' ? null : logger.info(printSchema(schema))
 
 export default schema

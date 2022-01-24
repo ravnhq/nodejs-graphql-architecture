@@ -1,24 +1,21 @@
 import { Exclude, Expose } from 'class-transformer'
-import { BaseDto } from '../base.dto'
 
 @Exclude()
-export class UserDto extends BaseDto {
+export class ProductDto {
   @Expose()
   readonly id: string
 
   @Expose()
-  readonly firstName: string
+  readonly name: string
 
   @Expose()
-  readonly lastName: string
+  readonly price: number
 
   @Expose()
-  readonly email: string
-
-  readonly password: string
+  readonly status: boolean
 
   @Expose()
-  readonly type: string
+  readonly attachment?: string
 
   @Expose()
   readonly createdAt: Date

@@ -1,22 +1,24 @@
-import { Decimal } from '@prisma/client/runtime'
 import { Exclude, Expose } from 'class-transformer'
+import { BaseDto } from '../../../products/dtos/base.dto'
 
 @Exclude()
-export class ProductDto {
+export class UserDto extends BaseDto {
   @Expose()
   readonly id: string
 
   @Expose()
-  readonly name: string
+  readonly firstName: string
 
   @Expose()
-  readonly price: Decimal
+  readonly lastName: string
 
   @Expose()
-  readonly status: boolean
+  readonly email: string
+
+  readonly password: string
 
   @Expose()
-  readonly attachment?: string
+  readonly type: string
 
   @Expose()
   readonly createdAt: Date

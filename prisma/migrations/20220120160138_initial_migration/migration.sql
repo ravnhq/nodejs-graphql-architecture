@@ -19,7 +19,7 @@ CREATE TABLE "users" (
 CREATE TABLE "products" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
-    "price" DECIMAL(65,30) NOT NULL,
+    "price" DOUBLE PRECISION NOT NULL,
     "status" BOOLEAN NOT NULL,
     "attachment_id" TEXT,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -64,12 +64,25 @@ CREATE TABLE "orders" (
 CREATE TABLE "details" (
     "id" TEXT NOT NULL,
     "quantity" INTEGER NOT NULL,
-    "total" DECIMAL(65,30) NOT NULL,
+    "total" DOUBLE PRECISION NOT NULL,
     "producto_id" TEXT NOT NULL,
     "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
     "updated_at" TIMESTAMP(3) NOT NULL,
 
     CONSTRAINT "details_pkey" PRIMARY KEY ("id")
+);
+
+-- CreateTable
+CREATE TABLE "auths" (
+    "id" SERIAL NOT NULL,
+    "uuid" TEXT NOT NULL,
+    "created_at" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    "user_id" TEXT NOT NULL,
+    "jti" TEXT NOT NULL,
+    "aud" TEXT,
+    "refresh_token" TEXT NOT NULL,
+
+    CONSTRAINT "auths_pkey" PRIMARY KEY ("id")
 );
 
 -- CreateIndex
@@ -90,6 +103,15 @@ CREATE UNIQUE INDEX "orders_id_key" ON "orders"("id");
 -- CreateIndex
 CREATE UNIQUE INDEX "details_id_key" ON "details"("id");
 
+-- CreateIndex
+CREATE UNIQUE INDEX "auths_uuid_key" ON "auths"("uuid");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "auths_jti_key" ON "auths"("jti");
+
+-- CreateIndex
+CREATE UNIQUE INDEX "auths_refresh_token_key" ON "auths"("refresh_token");
+
 -- AddForeignKey
 ALTER TABLE "products" ADD CONSTRAINT "products_attachment_id_fkey" FOREIGN KEY ("attachment_id") REFERENCES "attachments"("id") ON DELETE SET NULL ON UPDATE CASCADE;
 
@@ -107,3 +129,6 @@ ALTER TABLE "orders" ADD CONSTRAINT "orders_user_id_fkey" FOREIGN KEY ("user_id"
 
 -- AddForeignKey
 ALTER TABLE "details" ADD CONSTRAINT "details_producto_id_fkey" FOREIGN KEY ("producto_id") REFERENCES "products"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+
+-- AddForeignKey
+ALTER TABLE "auths" ADD CONSTRAINT "auths_user_id_fkey" FOREIGN KEY ("user_id") REFERENCES "users"("id") ON DELETE RESTRICT ON UPDATE CASCADE;

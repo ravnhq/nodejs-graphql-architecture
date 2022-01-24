@@ -21,7 +21,7 @@ model User {
   updatedAt   DateTime      @updatedAt @map("updated_at")
   orders      Order[]
   userProduct UserProduct[]
-
+  auths       Auth[]
 
   @@map("users")
 }
@@ -29,7 +29,7 @@ model User {
 model Product {
   id           String        @id @unique @default(uuid())
   name         String
-  price        Decimal
+  price        Float
   status       Boolean
   attachment   Attachment?   @relation(fields: [attachmentId], references: [id])
   attachmentId String?       @map("attachment_id")
@@ -81,13 +81,26 @@ model Detail {
   id        String   @id @unique @default(uuid())
   orders    Order[]
   quantity  Int
-  total     Decimal
+  total     Float
   productId String   @map("producto_id")
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("details")
+}
+
+model Auth {
+  id           Int      @id @default(autoincrement())
+  uuid         String   @unique @default(uuid())
+  createdAt    DateTime @default(now()) @map(name: "created_at")
+  userId       String   @map(name: "user_id")
+  user         User     @relation(fields: [userId], references: [id])
+  jti          String   @unique @default(uuid())
+  aud          String?
+  refreshToken String   @unique @default(uuid()) @map(name: "refresh_token")
+
+  @@map(name: "auths")
 }
 
 enum TypeUser {

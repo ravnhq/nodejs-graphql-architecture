@@ -1,5 +1,5 @@
 import { GraphQLFieldConfig, GraphQLInt, GraphQLNonNull } from 'graphql'
-import { ProductService } from '../../services/products.service'
+import { ProductService } from '../../services/products/products.service'
 import { ProductsType } from '../types/products.type'
 
 const listProducts: GraphQLFieldConfig<any, any> = {

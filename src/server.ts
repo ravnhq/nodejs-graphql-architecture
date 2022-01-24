@@ -1,11 +1,12 @@
 import 'reflect-metadata'
 import { graphqlHTTP } from 'express-graphql'
 import express, { NextFunction, Request, Response } from 'express'
+import { verify } from 'jsonwebtoken'
 import cors from 'cors'
 import { HttpError } from 'http-errors'
 import logger from './logger'
 import schema from './schema'
-
+import { prisma } from './prisma'
 const app = express()
 const PORT = process.env.PORT ?? 3000
 const ENVIROMENT = process.env.NODE_ENV ?? 'development'
@@ -48,11 +49,36 @@ app.get('/api/v1/status', (_req: Request, res: Response) => {
   res.json({ time: new Date() })
 })
 
-app.use('/graphql', (req: Request, res: Response) => {
+app.use('/graphql', async (req: Request, res: Response) => {
+  let currentUser
+  try {
+    const authToken =
+      req && req.headers && req.headers.authorization
+        ? verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET ?? '') // "Bearer "
+        : null
+
+    if (authToken && typeof authToken !== 'string') {
+      currentUser = await prisma.auth.findFirst({
+        where: { jti: authToken.jti },
+        rejectOnNotFound: false,
+      })
+    }
+
+    if (authToken && !currentUser) {
+      return res.status(401).send({
+        errors: [{ message: 'Invalid access token' }],
+      })
+    }
+  } catch (error) {
+    return res.status(401).send({
+      errors: [{ message: 'Invalid access token' }],
+    })
+  }
+
   graphqlHTTP({
     schema,
-    graphiql: true,
-    context: {},
+    graphiql: { headerEditorEnabled: true },
+    context: { currentUser },
     customFormatErrorFn: (err) => {
       const errorReport = {
         message: err.message,
