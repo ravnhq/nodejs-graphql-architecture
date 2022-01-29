@@ -2,7 +2,7 @@ import { PrismaClient, TypeUser } from '@prisma/client'
 import { hashSync } from 'bcrypt'
 
 export default async (prisma: PrismaClient) => {
-  const password = hashSync('welcome123', 10)
+  const password = hashSync('Welcome123!', 10)
   const result = []
   result.push(
     await prisma.user.upsert({
@@ -13,7 +13,9 @@ export default async (prisma: PrismaClient) => {
         lastName: 'de rivero',
         password,
       },
-      update: {},
+      update: {
+        password,
+      },
       where: { email: 'eduardomanrique@ravn.co' },
     }),
   )

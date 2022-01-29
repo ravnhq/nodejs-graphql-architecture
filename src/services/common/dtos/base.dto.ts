@@ -1,18 +1,22 @@
-import createError from 'http-errors'
+import createError, { BadRequest } from 'http-errors'
 import { validate, ValidationError } from 'class-validator'
 
 export class BaseDto {
   async isValid(): Promise<boolean> {
     const errors = await validate(this)
-    const badRequest = new createError.BadRequest()
 
     if (errors.length > 0) {
-      throw createError(badRequest.statusCode, badRequest.name, {
-        errors: errors.map((e: ValidationError) => ({
-          property: e.property,
-          constraints: this.getConstraints(e),
-        })),
-      })
+      const badRequest = new createError.BadRequest()
+
+      throw new BadRequest(
+        JSON.stringify({
+          name: badRequest.name,
+          description: errors.map((e: ValidationError) => ({
+            property: e.property,
+            constraints: this.getConstraints(e),
+          })),
+        }),
+      )
     }
 
     return true

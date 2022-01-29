@@ -4,9 +4,11 @@ import express, { NextFunction, Request, Response } from 'express'
 import { verify } from 'jsonwebtoken'
 import cors from 'cors'
 import { HttpError } from 'http-errors'
+import { Auth } from '@prisma/client'
 import logger from './logger'
 import schema from './schema'
 import { prisma } from './prisma'
+
 const app = express()
 const PORT = process.env.PORT ?? 3000
 const ENVIROMENT = process.env.NODE_ENV ?? 'development'
@@ -50,7 +52,7 @@ app.get('/api/v1/status', (_req: Request, res: Response) => {
 })
 
 app.use('/graphql', async (req: Request, res: Response) => {
-  let currentUser
+  let currentUser: Auth | undefined | null
   try {
     const authToken =
       req && req.headers && req.headers.authorization
@@ -79,15 +81,31 @@ app.use('/graphql', async (req: Request, res: Response) => {
     schema,
     graphiql: { headerEditorEnabled: true },
     context: { currentUser },
-    customFormatErrorFn: (err) => {
-      const errorReport = {
-        message: err.message,
-        locations: err.locations,
-        stack: err.stack ? err.stack.split('\n') : [],
-        path: err.path,
+    customFormatErrorFn: (error) => {
+      try {
+        const data: { name: string; description?: string | [string] } = JSON.parse(error.message)
+
+        const errorReport = {
+          message: data.name,
+          description: data.description,
+          locations: error.locations,
+          stack: error.stack ? error.stack.split('\n') : [],
+          path: error.path,
+        }
+        logger.error(errorReport)
+
+        return errorReport
+      } catch (e) {
+        logger.error(e)
+        const errorReport = {
+          message: error.name,
+          locations: error.locations,
+          stack: error.stack ? error.stack.split('\n') : [],
+          path: error.path,
+        }
+        logger.error(errorReport)
+        return errorReport
       }
-      logger.error(errorReport)
-      return errorReport
     },
   })(req, res)
 })

@@ -1,5 +1,6 @@
+import { Auth, TypeUser, User } from '@prisma/client'
 import ms from 'ms'
-import { Unauthorized } from 'http-errors'
+import { Unauthorized, BadRequest } from 'http-errors'
 import { plainToClass } from 'class-transformer'
 import { sign } from 'jsonwebtoken'
 import { compareSync } from 'bcrypt'
@@ -55,5 +56,16 @@ export class AuthService {
         expiresIn: args.expiresIn ?? process.env.JWT_EXP,
       },
     )
+  }
+
+  static async validateAdmin(auth?: Auth): Promise<User> {
+    if (auth) {
+      const user = await prisma.user.findUnique({ where: { id: auth.userId } })
+      if (user.type !== TypeUser.MANAGER) {
+        throw new BadRequest(JSON.stringify({ name: BadRequest.name, description: 'The user is not an admin user' }))
+      }
+      return user
+    }
+    throw new BadRequest(JSON.stringify({ name: BadRequest.name, description: 'The user is not an admin user' }))
   }
 }

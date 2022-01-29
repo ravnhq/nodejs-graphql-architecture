@@ -1,8 +1,9 @@
 import { IsEmail, Matches } from 'class-validator'
+import { BaseDto } from '../../../common/dtos/base.dto'
 
-export class LoginDto {
+export class LoginDto extends BaseDto {
   @IsEmail()
   readonly email: string
-  @Matches(/^(?=.*\d)(?=.*[a-z])(?=.*[A-Z])[0-9a-zA-Z]{8,}$/)
+  @Matches(/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*#&?])[A-Za-z\d@$!%*#&?]{6,}/)
   readonly password: string
 }

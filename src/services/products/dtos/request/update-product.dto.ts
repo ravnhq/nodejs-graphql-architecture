@@ -1,6 +1,7 @@
 import { IsBoolean, IsDecimal, IsOptional, IsString, IsUUID } from 'class-validator'
+import { BaseDto } from '../../../common/dtos/base.dto'
 
-export class UpdateProductDto {
+export class UpdateProductDto extends BaseDto {
   @IsUUID()
   readonly id: string
 

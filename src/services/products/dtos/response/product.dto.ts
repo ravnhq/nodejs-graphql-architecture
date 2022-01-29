@@ -1,4 +1,5 @@
 import { Exclude, Expose } from 'class-transformer'
+import { AttachmentDto } from '../../../attachments/dtos/respose/attachment.dto'
 
 @Exclude()
 export class ProductDto {
@@ -15,11 +16,11 @@ export class ProductDto {
   readonly status: boolean
 
   @Expose()
-  readonly attachment?: string
-
-  @Expose()
   readonly createdAt: Date
 
   @Expose()
   readonly updatedAt: Date
+
+  @Expose()
+  readonly attachment?: AttachmentDto
 }

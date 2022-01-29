@@ -1,20 +1,30 @@
-import { Product } from '@prisma/client'
+import { Product, User } from '@prisma/client'
+import { plainToClass } from 'class-transformer'
+import { BadRequest } from 'http-errors'
 import * as faker from 'faker'
 import logger from '../../logger'
 import { prisma, clearDatabase } from '../../prisma'
 import { ProductFactory } from '../../utils/factories/product.factory'
+import { UserFactory } from '../../utils/factories/user.factory'
+import { createProductDto } from './dtos/request/create-product.dto'
+import { UpdateProductDto } from './dtos/request/update-product.dto'
 import { ProductService } from './products.service'
 
 describe('ProductsService', () => {
   let productFactory: ProductFactory
+  let userFactory: UserFactory
+
   beforeAll(() => {
     productFactory = new ProductFactory(prisma)
+    userFactory = new UserFactory(prisma)
   })
 
   describe('createProduct', () => {
     it('should be create a new product', async () => {
       const name = faker.datatype.string()
-      const data = await ProductService.createProduct({ name, price: 0.0, status: true })
+      const data = await ProductService.createProduct(
+        plainToClass(createProductDto, { name, price: 0.0, status: true }),
+      )
 
       expect(data).toHaveProperty('name', name)
     })
@@ -42,14 +52,17 @@ describe('ProductsService', () => {
 
     it('should throw an error if the product does not exist', async () => {
       const productUUID = faker.datatype.uuid()
-      await expect(ProductService.updateProduct({ id: productUUID })).rejects.toThrowError(
-        new Error('No Product found'),
-      )
+
+      await expect(
+        ProductService.updateProduct(plainToClass(UpdateProductDto, { id: productUUID })),
+      ).rejects.toThrowError(new Error('No Product found'))
     })
 
     it('should update an existing product', async () => {
       const name = faker.datatype.string()
-      const productUpdated = await ProductService.updateProduct({ id: product.id, name })
+      const productUpdated = await ProductService.updateProduct(
+        plainToClass(UpdateProductDto, { id: product.id, name }),
+      )
 
       expect(productUpdated.name).toBe(name)
     })
@@ -95,11 +108,82 @@ describe('ProductsService', () => {
     })
   })
 
+  describe('addProductToCar', () => {
+    let user: User
+    let product: Product
+    beforeAll(async () => {
+      user = await userFactory.make()
+      product = await productFactory.make()
+    })
+
+    it('should throw an error if the user does not exist', async () => {
+      const fakeProduct = faker.datatype.uuid()
+
+      await expect(ProductService.addProductToCar(fakeProduct, user.id)).rejects.toThrowError()
+    })
+
+    it('should throw an error if the product does not exist', async () => {
+      const fakeUser = faker.datatype.uuid()
+
+      await expect(ProductService.addProductToCar(product.id, fakeUser)).rejects.toThrowError()
+    })
+
+    it('should add the product to a user car', async () => {
+      const result = await ProductService.addProductToCar(product.id, user.id)
+
+      expect(result).toHaveProperty('carDetail')
+    })
+
+    it('should throw an error if the product try to be added twice', async () => {
+      await expect(ProductService.addProductToCar(product.id, user.id)).rejects.toThrowError(
+        new BadRequest('{"name":"Error","description":"The product already exist into the car"}'),
+      )
+    })
+
+    it('should throw an error if the product was disabled', async () => {
+      const disabledProduct = await productFactory.make({ status: false })
+
+      await expect(ProductService.addProductToCar(disabledProduct.id, user.id)).rejects.toThrowError()
+    })
+  })
+
+  describe('likeProduct', () => {
+    let user: User
+    let product: Product
+    beforeAll(async () => {
+      user = await userFactory.make()
+      product = await productFactory.make()
+    })
+
+    it('should throw an error if the user does not exist', async () => {
+      const fakeProduct = faker.datatype.uuid()
+
+      await expect(ProductService.likeProduct(fakeProduct, user.id)).rejects.toThrowError()
+    })
+
+    it('should throw an error if the product does not exist', async () => {
+      const fakeUser = faker.datatype.uuid()
+
+      await expect(ProductService.likeProduct(product.id, fakeUser)).rejects.toThrowError()
+    })
+
+    it('should like the product', async () => {
+      const result = await ProductService.likeProduct(product.id, user.id)
+      expect(result).toHaveProperty('liked', true)
+    })
+
+    it('should unlike the product', async () => {
+      const result = await ProductService.likeProduct(product.id, user.id)
+      expect(result).toHaveProperty('liked', false)
+    })
+  })
+
   beforeEach(() => {
     jest.clearAllMocks()
   })
-  afterAll(() => {
-    prisma.$disconnect()
-    clearDatabase()
+
+  afterAll(async () => {
+    await clearDatabase()
+    await prisma.$disconnect()
   })
 })

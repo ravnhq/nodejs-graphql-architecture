@@ -11,32 +11,36 @@ datasource db {
 }
 
 model User {
-  id          String        @id @unique @default(uuid())
-  firstName   String        @map("first_name")
-  lastName    String        @map("last_name")
-  email       String        @unique
-  password    String
-  type        TypeUser
-  createdAt   DateTime      @default(now()) @map("created_at")
-  updatedAt   DateTime      @updatedAt @map("updated_at")
-  orders      Order[]
-  userProduct UserProduct[]
-  auths       Auth[]
+  id           String         @id @unique @default(uuid())
+  firstName    String         @map("first_name")
+  lastName     String         @map("last_name")
+  email        String         @unique
+  password     String
+  type         TypeUser
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
+  orders       Order[]
+  userProduct  UserProduct[]
+  auths        Auth[]
+  car          Car?
+  likedProduct LikedProduct[]
 
   @@map("users")
 }
 
 model Product {
-  id           String        @id @unique @default(uuid())
+  id           String         @id @unique @default(uuid())
   name         String
   price        Float
   status       Boolean
-  attachment   Attachment?   @relation(fields: [attachmentId], references: [id])
-  attachmentId String?       @map("attachment_id")
+  attachment   Attachment?    @relation(fields: [attachmentId], references: [id])
+  attachmentId String?        @map("attachment_id")
   detail       Detail[]
   userProduct  UserProduct[]
-  createdAt    DateTime      @default(now()) @map("created_at")
-  updatedAt    DateTime      @updatedAt @map("updated_at")
+  carDetails   CarDetail[]
+  likedProduct LikedProduct[]
+  createdAt    DateTime       @default(now()) @map("created_at")
+  updatedAt    DateTime       @updatedAt @map("updated_at")
 
   @@map("products")
 }
@@ -68,10 +72,9 @@ model Attachment {
 model Order {
   id        String   @id @unique @default(uuid())
   createdAt DateTime @default(now()) @map(name: "created_at")
-  detailId  String   @map("detail_id")
-  detail    Detail   @relation(fields: [detailId], references: [id])
   userId    String   @map("user_id")
   user      User     @relation(fields: [userId], references: [id])
+  detail    Detail[]
   updatedAt DateTime @updatedAt @map("updated_at")
 
   @@map("orders")
@@ -79,10 +82,11 @@ model Order {
 
 model Detail {
   id        String   @id @unique @default(uuid())
-  orders    Order[]
+  orderId   String
+  order     Order    @relation(fields: [orderId], references: [id])
   quantity  Int
   total     Float
-  productId String   @map("producto_id")
+  productId String   @map("product_id")
   product   Product  @relation(fields: [productId], references: [id])
   createdAt DateTime @default(now()) @map(name: "created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
@@ -91,8 +95,7 @@ model Detail {
 }
 
 model Auth {
-  id           Int      @id @default(autoincrement())
-  uuid         String   @unique @default(uuid())
+  id           String   @id @default(uuid())
   createdAt    DateTime @default(now()) @map(name: "created_at")
   userId       String   @map(name: "user_id")
   user         User     @relation(fields: [userId], references: [id])
@@ -101,6 +104,39 @@ model Auth {
   refreshToken String   @unique @default(uuid()) @map(name: "refresh_token")
 
   @@map(name: "auths")
+}
+
+model Car {
+  id        String      @id @default(uuid())
+  userId    String      @unique @map(name: "user_id")
+  user      User        @relation(fields: [userId], references: [id])
+  createdAt DateTime    @default(now()) @map(name: "created_at")
+  updatedAt DateTime    @updatedAt @map("updated_at")
+  carDetail CarDetail[]
+
+  @@map(name: "cars")
+}
+
+model CarDetail {
+  carId     String  @map(name: "car_id")
+  car       Car     @relation(fields: [carId], references: [id])
+  productId String  @map(name: "product_id")
+  product   Product @relation(fields: [productId], references: [id])
+  quantity  Int
+
+  @@id([carId, productId])
+  @@map(name: "car_details")
+}
+
+model LikedProduct {
+  userId    String  @map(name: "user_id")
+  user      User    @relation(fields: [userId], references: [id])
+  productId String  @map(name: "product_id")
+  product   Product @relation(fields: [productId], references: [id])
+  liked     Boolean
+
+  @@id([userId, productId])
+  @@map(name: "liked_products")
 }
 
 enum TypeUser {
