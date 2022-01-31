@@ -13,13 +13,14 @@ export class UserService {
 
   static async buyOrder(userId: string) {
     const user = await prisma.user.findUnique({ where: { id: userId } })
+
     const userCar = await prisma.car.findFirst({
       where: { userId: user.id },
       rejectOnNotFound: false,
       include: { carDetail: { include: { product: true } } },
     })
 
-    if (!userCar) {
+    if (!userCar || userCar.carDetail.length === 0) {
       throw new NotFound(JSON.stringify({ name: NotFound.name, description: 'The user has no items in his car' }))
     }
 

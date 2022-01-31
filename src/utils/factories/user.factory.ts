@@ -1,5 +1,6 @@
 import { Prisma, PrismaClient, TypeUser, User } from '@prisma/client'
 import * as faker from 'faker'
+import { hashSync } from 'bcrypt'
 import { AbstractFactory } from './abstract.factory'
 
 type UserInput = Partial<Prisma.UserCreateInput>
@@ -15,7 +16,7 @@ export class UserFactory extends AbstractFactory<User> {
         firstName: input.firstName ?? faker.name.firstName(),
         email: input.email ?? faker.internet.email(),
         lastName: input.lastName ?? faker.name.lastName(),
-        password: input.password ?? faker.lorem.word(),
+        password: hashSync(input.password ?? faker.internet.password(), 10),
         type: input.type ?? faker.random.arrayElement(Object.values(TypeUser)),
       },
     })

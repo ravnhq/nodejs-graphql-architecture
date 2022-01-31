@@ -19,6 +19,15 @@ describe('ProductsService', () => {
     userFactory = new UserFactory(prisma)
   })
 
+  beforeEach(async () => {
+    jest.clearAllMocks()
+  })
+
+  afterAll(async () => {
+    await clearDatabase()
+    await prisma.$disconnect()
+  })
+
   describe('createProduct', () => {
     it('should be create a new product', async () => {
       const name = faker.datatype.string()
@@ -31,11 +40,9 @@ describe('ProductsService', () => {
   })
 
   describe('listProducts', () => {
-    beforeAll(async () => {
-      await productFactory.makeMany(10)
-    })
-
     it('should retrieve the list of products paginated', async () => {
+      await productFactory.makeMany(10)
+
       const data = await ProductService.listProducts({ page: 1, perPage: 5 })
 
       expect(data.pagination.nextPage).toBeTruthy()
@@ -45,11 +52,6 @@ describe('ProductsService', () => {
   })
 
   describe('updateProduct', () => {
-    let product: Product
-    beforeAll(async () => {
-      product = await productFactory.make()
-    })
-
     it('should throw an error if the product does not exist', async () => {
       const productUUID = faker.datatype.uuid()
 
@@ -59,7 +61,9 @@ describe('ProductsService', () => {
     })
 
     it('should update an existing product', async () => {
+      const product = await productFactory.make()
       const name = faker.datatype.string()
+
       const productUpdated = await ProductService.updateProduct(
         plainToClass(UpdateProductDto, { id: product.id, name }),
       )
@@ -69,17 +73,13 @@ describe('ProductsService', () => {
   })
 
   describe('toggleProduct', () => {
-    let product: Product
-    beforeAll(async () => {
-      product = await productFactory.make({ status: true })
-    })
-
     it('should throw an error if the product does not exist', async () => {
       const productUUID = faker.datatype.uuid()
       await expect(ProductService.toogleProduct(productUUID)).rejects.toThrowError(new Error('No Product found'))
     })
 
     it('should switch the status for the product', async () => {
+      const product = await productFactory.make({ status: true })
       const productUpdated = await ProductService.toogleProduct(product.id)
 
       expect(productUpdated.status).toBeFalsy()
@@ -87,11 +87,6 @@ describe('ProductsService', () => {
   })
 
   describe('deleteProduct', () => {
-    let product: Product
-    beforeAll(async () => {
-      product = await productFactory.make({ detail: {} })
-    })
-
     it('should throw an error if the product does not exist', async () => {
       const productUUID = faker.datatype.uuid()
       const spyLogger = jest.spyOn(logger, 'error')
@@ -101,6 +96,7 @@ describe('ProductsService', () => {
     })
 
     it('should delete the product', async () => {
+      const product = await productFactory.make()
       const spyPrisma = jest.spyOn(prisma.product, 'delete')
       await ProductService.deleteProduct(product.id)
 
@@ -119,23 +115,27 @@ describe('ProductsService', () => {
     it('should throw an error if the user does not exist', async () => {
       const fakeProduct = faker.datatype.uuid()
 
-      await expect(ProductService.addProductToCar(fakeProduct, user.id)).rejects.toThrowError()
+      await expect(ProductService.addProductToCar(fakeProduct, user.id, 1)).rejects.toThrowError(
+        new Error('No Product found'),
+      )
     })
 
     it('should throw an error if the product does not exist', async () => {
       const fakeUser = faker.datatype.uuid()
 
-      await expect(ProductService.addProductToCar(product.id, fakeUser)).rejects.toThrowError()
+      await expect(ProductService.addProductToCar(product.id, fakeUser, 1)).rejects.toThrowError(
+        new Error('No User found'),
+      )
     })
 
     it('should add the product to a user car', async () => {
-      const result = await ProductService.addProductToCar(product.id, user.id)
+      const result = await ProductService.addProductToCar(product.id, user.id, faker.datatype.number({ min: 1 }))
 
       expect(result).toHaveProperty('carDetail')
     })
 
     it('should throw an error if the product try to be added twice', async () => {
-      await expect(ProductService.addProductToCar(product.id, user.id)).rejects.toThrowError(
+      await expect(ProductService.addProductToCar(product.id, user.id, 1)).rejects.toThrowError(
         new BadRequest('{"name":"Error","description":"The product already exist into the car"}'),
       )
     })
@@ -143,7 +143,7 @@ describe('ProductsService', () => {
     it('should throw an error if the product was disabled', async () => {
       const disabledProduct = await productFactory.make({ status: false })
 
-      await expect(ProductService.addProductToCar(disabledProduct.id, user.id)).rejects.toThrowError()
+      await expect(ProductService.addProductToCar(disabledProduct.id, user.id, 1)).rejects.toThrowError()
     })
   })
 
@@ -158,13 +158,13 @@ describe('ProductsService', () => {
     it('should throw an error if the user does not exist', async () => {
       const fakeProduct = faker.datatype.uuid()
 
-      await expect(ProductService.likeProduct(fakeProduct, user.id)).rejects.toThrowError()
+      await expect(ProductService.likeProduct(fakeProduct, user.id)).rejects.toThrowError(new Error('No Product found'))
     })
 
     it('should throw an error if the product does not exist', async () => {
       const fakeUser = faker.datatype.uuid()
 
-      await expect(ProductService.likeProduct(product.id, fakeUser)).rejects.toThrowError()
+      await expect(ProductService.likeProduct(product.id, fakeUser)).rejects.toThrowError(new Error('No User found'))
     })
 
     it('should like the product', async () => {
@@ -176,14 +176,5 @@ describe('ProductsService', () => {
       const result = await ProductService.likeProduct(product.id, user.id)
       expect(result).toHaveProperty('liked', false)
     })
-  })
-
-  beforeEach(() => {
-    jest.clearAllMocks()
-  })
-
-  afterAll(async () => {
-    await clearDatabase()
-    await prisma.$disconnect()
   })
 })

@@ -15,9 +15,6 @@ export class ProductFactory extends AbstractFactory<Product> {
         price: input.price ?? faker.datatype.float(),
         status: input.status ?? faker.datatype.boolean(),
         name: input.name ?? faker.datatype.string(),
-        detail: input.detail ?? {
-          create: { quantity: faker.datatype.number(), total: faker.datatype.float() },
-        },
       },
     })
   }
