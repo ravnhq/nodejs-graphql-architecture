@@ -10,7 +10,7 @@ export const ProductType = new GraphQLObjectType({
     name: { type: new GraphQLNonNull(GraphQLString) },
     price: { type: new GraphQLNonNull(GraphQLFloat) },
     status: { type: new GraphQLNonNull(GraphQLBoolean) },
-    attachment: { type: new GraphQLNonNull(AttachmentType) },
+    attachment: { type: AttachmentType },
     createdAt: { type: new GraphQLNonNull(DateTime) },
     updatedAt: { type: new GraphQLNonNull(DateTime) },
   },
