@@ -1,5 +1,7 @@
 import faker from 'faker'
+import { NotFound } from 'http-errors'
 import { clearDatabase, prisma } from '../../prisma'
+import { ProductFactory } from '../../utils/factories/product.factory'
 import { s3MockService } from '../common/mocks/default.mock'
 import { AttachmentService } from './attachment.service'
 import { ContentTypeEnum, FileExtensionEnum, ParentEnum } from './enums/attachment.enum'
@@ -9,6 +11,11 @@ jest.mock('aws-sdk', () => {
 })
 
 describe('AttachmentService', () => {
+  let productFactory: ProductFactory
+
+  beforeAll(() => {
+    productFactory = new ProductFactory(prisma)
+  })
   beforeEach(async () => {
     jest.clearAllMocks()
   })
@@ -20,8 +27,10 @@ describe('AttachmentService', () => {
 
   describe('create', () => {
     it('should create an attachment', async () => {
+      const product = await productFactory.make()
+
       const attachment = await AttachmentService.create({
-        id: faker.datatype.uuid(),
+        productId: product.id,
         ext: FileExtensionEnum.PNG,
         contentType: ContentTypeEnum.PNG,
         filename: faker.random.alphaNumeric(10),
@@ -37,6 +46,26 @@ describe('AttachmentService', () => {
   describe('getSignedUrl', () => {
     it('should return the link for the attachment', async () => {
       expect(AttachmentService.getSignedUrl(faker.random.alphaNumeric(8))).toBeTruthy()
+    })
+  })
+
+  describe('delete', () => {
+    it('should throw an error if the product does not have an attachment', async () => {
+      const product = await productFactory.make()
+
+      await expect(AttachmentService.delete(product.id)).rejects.toThrowError(
+        new NotFound('The task does not have an attachment'),
+      )
+    })
+
+    it('should delete the attachment and remove from the bucket', async () => {
+      const product = await productFactory.make({
+        attachment: { create: { contentType: ContentTypeEnum.PNG, ext: FileExtensionEnum.PNG, key: '', path: '' } },
+      })
+      const spyPrisma = jest.spyOn(prisma.attachment, 'delete')
+      await AttachmentService.delete(product.id)
+
+      expect(spyPrisma).toBeCalledWith({ where: { productId: product.id } })
     })
   })
 })
