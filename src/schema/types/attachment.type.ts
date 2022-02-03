@@ -7,7 +7,7 @@ export const AttachmentType = new GraphQLObjectType({
   name: 'Attachment',
   description: 'Attachment',
   fields: {
-    id: { type: GraphQLString },
+    productId: { type: GraphQLString },
     path: { type: GraphQLString },
     key: { type: GraphQLString },
     ext: { type: ExtTypeEnum },

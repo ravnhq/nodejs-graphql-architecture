@@ -20,6 +20,9 @@ export class AttachmentDto implements Attachment {
   readonly contentType: ContentTypeEnum
 
   @Expose()
+  readonly productId: string
+
+  @Expose()
   readonly signedUrl?: string
 
   @Expose()
