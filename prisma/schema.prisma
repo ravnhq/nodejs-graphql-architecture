@@ -33,8 +33,7 @@ model Product {
   name         String
   price        Float
   status       Boolean
-  attachment   Attachment?    @relation(fields: [attachmentId], references: [id])
-  attachmentId String?        @map("attachment_id")
+  attachment   Attachment?
   detail       Detail[]
   userProduct  UserProduct[]
   carDetails   CarDetail[]
@@ -57,14 +56,15 @@ model UserProduct {
 }
 
 model Attachment {
-  id          String    @id @unique @default(uuid())
+  id          String   @id @unique @default(uuid())
   path        String
   key         String
   ext         String
-  contentType String    @map(name: "content_type")
-  products    Product[]
-  createdAt   DateTime  @default(now()) @map(name: "created_at")
-  updatedAt   DateTime  @updatedAt @map("updated_at")
+  contentType String   @map(name: "content_type")
+  productId   String   @unique
+  product     Product  @relation(fields: [productId], references: [id])
+  createdAt   DateTime @default(now()) @map(name: "created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
 
   @@map("attachments")
 }
