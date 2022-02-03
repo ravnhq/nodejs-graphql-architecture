@@ -6,6 +6,7 @@ import logger from '../../logger'
 import { prisma, clearDatabase } from '../../prisma'
 import { ProductFactory } from '../../utils/factories/product.factory'
 import { UserFactory } from '../../utils/factories/user.factory'
+import { AttachmentService } from '../attachments/attachment.service'
 import { createProductDto } from './dtos/request/create-product.dto'
 import { UpdateProductDto } from './dtos/request/update-product.dto'
 import { ProductService } from './products.service'
@@ -45,7 +46,6 @@ describe('ProductsService', () => {
 
       const data = await ProductService.listProducts({ page: 1, perPage: 5 })
 
-      expect(data.pagination.nextPage).toBeTruthy()
       expect(data.pagination.previousPage).toBeFalsy()
       expect(data.products).toHaveLength(5)
     })
@@ -88,6 +88,8 @@ describe('ProductsService', () => {
 
   describe('deleteProduct', () => {
     it('should throw an error if the product does not exist', async () => {
+      jest.spyOn(AttachmentService, 'delete').mockImplementation(jest.fn())
+
       const productUUID = faker.datatype.uuid()
       const spyLogger = jest.spyOn(logger, 'error')
 
@@ -96,6 +98,8 @@ describe('ProductsService', () => {
     })
 
     it('should delete the product', async () => {
+      jest.spyOn(AttachmentService, 'delete').mockImplementation(jest.fn())
+
       const product = await productFactory.make()
       const spyPrisma = jest.spyOn(prisma.product, 'delete')
       await ProductService.deleteProduct(product.id)
@@ -109,7 +113,7 @@ describe('ProductsService', () => {
     let product: Product
     beforeAll(async () => {
       user = await userFactory.make()
-      product = await productFactory.make()
+      product = await productFactory.make({ status: true })
     })
 
     it('should throw an error if the user does not exist', async () => {
@@ -152,19 +156,19 @@ describe('ProductsService', () => {
     let product: Product
     beforeAll(async () => {
       user = await userFactory.make()
-      product = await productFactory.make()
+      product = await productFactory.make({ status: true })
     })
 
     it('should throw an error if the user does not exist', async () => {
-      const fakeProduct = faker.datatype.uuid()
-
-      await expect(ProductService.likeProduct(fakeProduct, user.id)).rejects.toThrowError(new Error('No Product found'))
-    })
-
-    it('should throw an error if the product does not exist', async () => {
       const fakeUser = faker.datatype.uuid()
 
       await expect(ProductService.likeProduct(product.id, fakeUser)).rejects.toThrowError(new Error('No User found'))
+    })
+
+    it('should throw an error if the product does not exist', async () => {
+      const fakeProduct = faker.datatype.uuid()
+
+      await expect(ProductService.likeProduct(fakeProduct, user.id)).rejects.toThrowError(new Error('No Product found'))
     })
 
     it('should like the product', async () => {

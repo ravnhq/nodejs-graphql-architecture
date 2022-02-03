@@ -34,14 +34,14 @@ export class ProductService {
 
     const productWithSignedUrl = products.map((product) => ({
       ...product,
-      attachment: {
-        ...product.attachment,
-        signedUrl: product.attachment
-          ? AttachmentService.getSignedUrl(
+      attachment: product.attachment
+        ? {
+            ...product.attachment,
+            signedUrl: AttachmentService.getSignedUrl(
               `${product.attachment?.path}/${product.attachment?.key}.${product.attachment?.ext}`,
-            )
-          : undefined,
-      },
+            ),
+          }
+        : undefined,
     }))
 
     const productsClass = plainToInstance(ProductDto, productWithSignedUrl)
@@ -80,6 +80,8 @@ export class ProductService {
 
   static async deleteProduct(id: string): Promise<ProductDto> {
     try {
+      await AttachmentService.delete(id)
+
       const product = await prisma.product.delete({ where: { id } })
 
       return plainToClass(ProductDto, product)
@@ -161,10 +163,8 @@ export class ProductService {
       ext,
       filename,
       parentType: ParentEnum.PRODUCT,
-      id: product.id,
+      productId: product.id,
     })
-
-    await prisma.product.update({ data: { attachment: { connect: { id: attachment.id } } }, where: { id: product.id } })
 
     return plainToClass(AttachmentDto, attachment)
   }
@@ -178,12 +178,14 @@ export class ProductService {
 
     return plainToClass(ProductDto, {
       ...product,
-      attachment: {
-        ...product.attachment,
-        signedUrl: AttachmentService.getSignedUrl(
-          `${product.attachment?.path}/${product.attachment?.key}.${product.attachment?.ext}`,
-        ),
-      },
+      attachment: product.attachment
+        ? {
+            ...product.attachment,
+            signedUrl: AttachmentService.getSignedUrl(
+              `${product.attachment?.path}/${product.attachment?.key}.${product.attachment?.ext}`,
+            ),
+          }
+        : undefined,
     })
   }
 }
