@@ -1,5 +1,5 @@
-import { Exclude, Expose } from "class-transformer"
-import { BaseDto } from "../base.dto"
+import { Exclude, Expose } from 'class-transformer'
+import { BaseDto } from '../../../products/dtos/base.dto'
 
 @Exclude()
 export class UserDto extends BaseDto {

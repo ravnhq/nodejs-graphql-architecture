@@ -1,34 +1,26 @@
-import "reflect-metadata"
-import { graphqlHTTP } from "express-graphql"
-import express, { NextFunction, Request, Response } from "express"
-import cors from "cors"
-import createHttpError, { HttpError } from "http-errors"
-import { PrismaClient } from "@prisma/client"
-import logger from "./logger"
-import schema from "./schema"
-
-export const prisma = new PrismaClient({
-  rejectOnNotFound: (error) => new createHttpError.NotFound(error.message),
-})
-
+import 'reflect-metadata'
+import { graphqlHTTP } from 'express-graphql'
+import express, { NextFunction, Request, Response } from 'express'
+import { verify } from 'jsonwebtoken'
+import cors from 'cors'
+import { HttpError } from 'http-errors'
+import logger from './logger'
+import schema from './schema'
+import { prisma } from './prisma'
 const app = express()
 const PORT = process.env.PORT ?? 3000
-const ENVIROMENT = process.env.NODE_ENV ?? "development"
+const ENVIROMENT = process.env.NODE_ENV ?? 'development'
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
 app.use(cors())
 
-function errorHandler(
-  err: HttpError,
-  _req: Request,
-  res: Response,
-  _next: NextFunction,
-): void {
-  if (ENVIROMENT !== "development") {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+function errorHandler(err: HttpError, _req: Request, res: Response, _next: NextFunction): void {
+  if (ENVIROMENT !== 'development') {
     logger.error(err.message)
-    logger.error(err.stack || "")
+    logger.error(err.stack || '')
   }
 
   res.status(err.status ?? 500)
@@ -53,20 +45,45 @@ app.use((req: Request, _res: Response, next: NextFunction) => {
   next()
 })
 
-app.get("/api/v1/status", (_req: Request, res: Response) => {
+app.get('/api/v1/status', (_req: Request, res: Response) => {
   res.json({ time: new Date() })
 })
 
-app.use("/graphql", (req: Request, res: Response) => {
+app.use('/graphql', async (req: Request, res: Response) => {
+  let currentUser
+  try {
+    const authToken =
+      req && req.headers && req.headers.authorization
+        ? verify(req.headers.authorization.split(' ')[1], process.env.JWT_SECRET ?? '') // "Bearer "
+        : null
+
+    if (authToken && typeof authToken !== 'string') {
+      currentUser = await prisma.auth.findFirst({
+        where: { jti: authToken.jti },
+        rejectOnNotFound: false,
+      })
+    }
+
+    if (authToken && !currentUser) {
+      return res.status(401).send({
+        errors: [{ message: 'Invalid access token' }],
+      })
+    }
+  } catch (error) {
+    return res.status(401).send({
+      errors: [{ message: 'Invalid access token' }],
+    })
+  }
+
   graphqlHTTP({
     schema,
-    graphiql: true,
-    context: {},
+    graphiql: { headerEditorEnabled: true },
+    context: { currentUser },
     customFormatErrorFn: (err) => {
       const errorReport = {
         message: err.message,
         locations: err.locations,
-        stack: err.stack ? err.stack.split("\n") : [],
+        stack: err.stack ? err.stack.split('\n') : [],
         path: err.path,
       }
       logger.error(errorReport)

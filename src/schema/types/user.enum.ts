@@ -1,9 +1,9 @@
-import { GraphQLEnumType } from "graphql"
+import { GraphQLEnumType } from 'graphql'
 
 export const UserTypeEnum = new GraphQLEnumType({
-  name: "UserType",
+  name: 'UserType',
   values: {
-    MANAGER: { value: "MANAGER" },
-    CLIENT: { value: "CLIENT" },
+    MANAGER: { value: 'MANAGER' },
+    CLIENT: { value: 'CLIENT' },
   },
 })
